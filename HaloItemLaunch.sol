@@ -77,10 +77,12 @@ contract HaloItemLaunch is Ownable {
     );
 
     address public _SIGNER;
+    address public _VAULT;
 
-    constructor(address SIGNER) {
+    constructor(address SIGNER, address VAULT) {
 
         _SIGNER = SIGNER;
+        _VAULT = VAULT;
 
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
@@ -104,7 +106,7 @@ contract HaloItemLaunch is Ownable {
 
         
         IERC20 costErc20 = IERC20(condition.costErc20);
-        costErc20.safeTransferFrom(msg.sender, address(this), condition.costAmount);
+        costErc20.safeTransferFrom(msg.sender, _VAULT, condition.costAmount);
 
         _checkInDB[msg.sender] = condition.costAmount;
 
@@ -125,28 +127,13 @@ contract HaloItemLaunch is Ownable {
         _SIGNER = signer;
     }
 
+    function updateValut( address vault) external onlyOwner {
+        _VAULT = vault;
+    }
+
     //dev: urgency withdraw erc20
     function urgencyWithdrawErc20(address erc20, address target) public  onlyOwner {
         IERC20(erc20).safeTransfer(target, IERC20(erc20).balanceOf(address(this)));
-    }
-
-     //dev: refund of unwon funds
-    function returned(address erc20, address[] calldata whiteList, uint256[] calldata amounts) onlyOwner external  {
-
-        require(whiteList.length == amounts.length, "count not match!");
-
-        uint256 cost = 0;
-        for(uint256 i=0; i<amounts.length; i++){
-            cost = cost + amounts[i];
-        }
-
-        require( IERC20(erc20).balanceOf(address(this)) >= cost, "invalid cost amount! ");
-        
-        for (uint256 i=0; i<whiteList.length; i++) {
-            require(whiteList[i] != address(0),"Address is not valid");
-             IERC20(erc20).safeTransfer(whiteList[i], amounts[i]);
-        }
-        
     }
     
     //dev: get the condition data hash

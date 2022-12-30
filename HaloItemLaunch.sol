@@ -26,12 +26,12 @@
 */
 
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
@@ -49,7 +49,6 @@ contract HaloItemLaunch is Ownable {
 
     using EnumerableSet for EnumerableSet.Bytes32Set;
     using ECDSA for bytes32;
-    using Address for address;
     using SafeERC20 for IERC20;
 
     mapping(address=>uint256) public _checkInDB;
@@ -101,7 +100,9 @@ contract HaloItemLaunch is Ownable {
         require(block.timestamp > condition.startTime && block.timestamp < condition.endTime, "inalid register time!");
         require(verify(condition, msg.sender, dataSignature),"invalid data signature!");
         require(isValidSignCode(condition.signCode),"invalid signCode!");
+        require(condition.costAmount>0, "zero cost amount!");
 
+        
         IERC20 costErc20 = IERC20(condition.costErc20);
         costErc20.safeTransferFrom(msg.sender, address(this), condition.costAmount);
 

@@ -122,19 +122,6 @@ contract HaloItemLaunch is Ownable {
     function isRegister( address owner ) public view returns(bool){
         return _checkInDB[owner] != 0;
     }
-
-    function updateSigner( address signer) external onlyOwner {
-        _SIGNER = signer;
-    }
-
-    function updateValut( address vault) external onlyOwner {
-        _VAULT = vault;
-    }
-
-    //dev: urgency withdraw erc20
-    function urgencyWithdrawErc20(address erc20, address target) public  onlyOwner {
-        IERC20(erc20).safeTransfer(target, IERC20(erc20).balanceOf(address(this)));
-    }
     
     //dev: get the condition data hash
     function hashCondition(Condition calldata condition) public pure returns (bytes32) {
